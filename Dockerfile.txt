@@ -1,20 +1,12 @@
-# Usa Java 17
-FROM openjdk:17-jdk-slim
+FROM eclipse-temurin:17-jdk
 
-# Carpeta de trabajo
 WORKDIR /app
 
-# Copiar todo
 COPY . .
 
-# Dar permisos a mvnw
 RUN chmod +x mvnw
-
-# Build
 RUN ./mvnw clean package -DskipTests
 
-# Exponer puerto
 EXPOSE 8080
 
-# Ejecutar app
-CMD ["java", "-jar", "target/*.jar"]
+CMD ["sh", "-c", "java -jar target/*.jar"]
