@@ -23,12 +23,13 @@ public class Plan {
     @JsonIgnoreProperties({"planes", "rutinas"})
     private Cliente cliente;
 
-    @Lob
+
     @Column(columnDefinition = "JSON")
     private String dieta; // 🔥 antes dietaJson
 
     @Lob
-    private String html; // 🔥 antes dietaHtml
+    @Column(columnDefinition = "LONGTEXT")
+    private String html;
 
     private Integer calorias;
     private Integer proteina;

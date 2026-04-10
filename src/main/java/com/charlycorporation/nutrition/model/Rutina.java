@@ -25,7 +25,8 @@ public class Rutina {
     private Cliente cliente;
 
     @Lob
-    private String rutinaHtml; // 🔥 guardas tal cual tu HTML
+    @Column(columnDefinition = "LONGTEXT")
+    private String rutinaHtml;
 
     private LocalDate fecha;
 
