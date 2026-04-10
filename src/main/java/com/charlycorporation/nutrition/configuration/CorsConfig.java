@@ -14,17 +14,10 @@ public class CorsConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/api/**")
-                        .allowedOrigins(
-                                "http://localhost:5500",
-                                "https://charly12543.github.io"
-                        )
-                        .allowedMethods("*")
+                        .allowedOriginPatterns("*")
+                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowedHeaders("*");
-                       // .allowCredentials(true);
             }
         };
     }
-
-
-
 }
