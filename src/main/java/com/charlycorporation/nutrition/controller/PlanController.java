@@ -112,5 +112,11 @@ public class PlanController {
     }
 
 
+    @GetMapping("/api/health")
+    public String health() {
+        return "ok";
+    }
+
+
 
 }
