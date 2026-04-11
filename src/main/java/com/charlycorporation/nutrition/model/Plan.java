@@ -28,7 +28,7 @@ public class Plan {
     private String dieta; // 🔥 antes dietaJson
 
     @Lob
-    @Column(columnDefinition = "LONGTEXT")
+    @Column(columnDefinition = "TEXT")
     private String html;
 
     private Integer calorias;
