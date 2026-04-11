@@ -24,7 +24,7 @@ public class Plan {
     private Cliente cliente;
 
 
-    @Column(columnDefinition = "JSON")
+    @Column(columnDefinition = "TEXT")
     private String dieta; // 🔥 antes dietaJson
 
     @Lob
