@@ -47,10 +47,14 @@ public class AuthController {
     @GetMapping("/init")
     public String init(){
 
+        if(usuarioRepo.findByUsuario("admin").isPresent()){
+            return "usuario ya existe";
+        }
+
         Usuario u = new Usuario();
-        u.setUsuario("admin2");
+        u.setUsuario("admin");
         u.setPassword("1234");
-        u.setRol("ADMIN"); // 🔥 CLAVE
+        u.setRol("ADMIN");
 
         usuarioRepo.save(u);
 
