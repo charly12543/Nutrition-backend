@@ -39,17 +39,31 @@ public class PlanService implements IPlanService{
             JsonNode root = mapper.readTree(dietaJson);
 
             // 🔥 EXTRAER DATOS
-            String caloriasStr = root.path("calorias").asText();
+         /*   String caloriasStr = root.path("calorias").asText();
             String proteinaStr = root.path("proteina").asText();
             String carbosStr = root.path("carbos").asText();
             String grasaStr = root.path("grasa").asText();
-            int fase = root.path("clienteInfo").path("fase").asInt();
+            int fase = root.path("clienteInfo").path("fase").asInt(); */
+
+            String caloriasStr = root.has("calorias") ? root.get("calorias").asText() : "0";
+            String proteinaStr = root.has("proteina") ? root.get("proteina").asText() : "0";
+            String carbosStr = root.has("carbos") ? root.get("carbos").asText() : "0";
+            String grasaStr = root.has("grasa") ? root.get("grasa").asText() : "0";
+
+            int fase = root.has("clienteInfo") && root.get("clienteInfo").has("fase")
+                    ? root.get("clienteInfo").get("fase").asInt()
+                    : 1;
 
             // 🔥 LIMPIAR
-            int calorias = Integer.parseInt(caloriasStr.replaceAll("[^0-9]", ""));
-            int proteina = Integer.parseInt(proteinaStr.replaceAll("[^0-9]", ""));
-            int carbos = Integer.parseInt(carbosStr.replaceAll("[^0-9]", ""));
-            int grasa = Integer.parseInt(grasaStr.replaceAll("[^0-9]", ""));
+           // int calorias = Integer.parseInt(caloriasStr.replaceAll("[^0-9]", ""));
+            // int proteina = Integer.parseInt(proteinaStr.replaceAll("[^0-9]", ""));
+           // int carbos = Integer.parseInt(carbosStr.replaceAll("[^0-9]", ""));
+           // int grasa = Integer.parseInt(grasaStr.replaceAll("[^0-9]", ""));
+
+            int calorias = parseSafe(caloriasStr);
+            int proteina = parseSafe(proteinaStr);
+            int carbos = parseSafe(carbosStr);
+            int grasa = parseSafe(grasaStr);
 
             // 🔍 BUSCAR SI YA EXISTE CLIENTE
             Cliente clienteGuardado;
@@ -204,7 +218,7 @@ public class PlanService implements IPlanService{
 
             JsonNode root = mapper.readTree(dietaJson);
 
-            String caloriasStr = root.path("calorias").asText();
+           /* String caloriasStr = root.path("calorias").asText();
             String proteinaStr = root.path("proteina").asText();
             String carbosStr = root.path("carbos").asText();
             String grasaStr = root.path("grasa").asText();
@@ -213,11 +227,28 @@ public class PlanService implements IPlanService{
             int calorias = Integer.parseInt(caloriasStr.replaceAll("[^0-9]", ""));
             int proteina = Integer.parseInt(proteinaStr.replaceAll("[^0-9]", ""));
             int carbos = Integer.parseInt(carbosStr.replaceAll("[^0-9]", ""));
-            int grasa = Integer.parseInt(grasaStr.replaceAll("[^0-9]", ""));
+            int grasa = Integer.parseInt(grasaStr.replaceAll("[^0-9]", "")); */
+
+            String caloriasStr = root.has("calorias") ? root.get("calorias").asText() : "0";
+            String proteinaStr = root.has("proteina") ? root.get("proteina").asText() : "0";
+            String carbosStr = root.has("carbos") ? root.get("carbos").asText() : "0";
+            String grasaStr = root.has("grasa") ? root.get("grasa").asText() : "0";
+
+            int fase = root.has("clienteInfo") && root.get("clienteInfo").has("fase")
+                    ? root.get("clienteInfo").get("fase").asInt()
+                    : 1;
+
+            int calorias = parseSafe(caloriasStr);
+            int proteina = parseSafe(proteinaStr);
+            int carbos = parseSafe(carbosStr);
+            int grasa = parseSafe(grasaStr);
 
             // 🔥 UPDATE PLAN
             existente.setDieta(dietaJson);
-            existente.setHtml(payload.get("html").toString());
+
+            Object htmlObj = payload.get("html");
+            existente.setHtml(htmlObj != null ? htmlObj.toString() : "");
+          //  existente.setHtml(payload.get("html").toString());
 
             existente.setCalorias(calorias);
             existente.setProteina(proteina);
@@ -231,6 +262,22 @@ public class PlanService implements IPlanService{
 
         } catch (Exception e){
             throw new RuntimeException("Error actualizando plan", e);
+        }
+    }
+
+
+    private int parseSafe(String value){
+        try {
+            if(value == null) return 0;
+
+            String limpio = value.replaceAll("[^0-9]", "");
+
+            if(limpio.isEmpty()) return 0;
+
+            return Integer.parseInt(limpio);
+
+        } catch (Exception e){
+            return 0;
         }
     }
 

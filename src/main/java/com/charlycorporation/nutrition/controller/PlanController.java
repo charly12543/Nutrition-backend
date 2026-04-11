@@ -27,6 +27,8 @@ public class PlanController {
     @PostMapping("/guardar-plan")
     public ResponseEntity<?> guardar(@RequestBody Map<String, Object> payload){
 
+        System.out.println("🔥 PAYLOAD: " + payload);
+
         try {
 
             ObjectMapper mapper = new ObjectMapper();
