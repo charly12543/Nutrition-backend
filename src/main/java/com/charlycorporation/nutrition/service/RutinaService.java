@@ -21,16 +21,13 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class RutinaService implements IRutinaService{
 
-
     private final RutinaRepository rutinaRepo;
-
     private final ClienteRepository clienteRepo;
-
     private final PlanRepository planRepo;
 
     public Rutina guardarRutina(Cliente cliente, String html){
 
-        // 🔍 BUSCAR SI YA EXISTE
+        // 🔍 BUSCAR / CREAR CLIENTE
         Cliente clienteGuardado;
 
         if(cliente.getId() != null){
@@ -55,7 +52,19 @@ public class RutinaService implements IRutinaService{
 
         clienteGuardado = clienteRepo.save(clienteGuardado);
 
-        // 🔥 CREAR RUTINA
+        // 🔥 NUEVO: VALIDAR SI YA TIENE UNA RUTINA (EVITAR DUPLICADOS)
+        Optional<Rutina> existente = rutinaRepo.findTopByClienteOrderByFechaDesc(clienteGuardado);
+
+        if(existente.isPresent()){
+            Rutina r = existente.get();
+
+            r.setRutinaHtml(html);
+            r.setFecha(LocalDate.now());
+
+            return rutinaRepo.save(r);
+        }
+
+        // 🔥 CREAR NUEVA SI NO EXISTE
         Rutina r = new Rutina();
         r.setCliente(clienteGuardado);
         r.setRutinaHtml(html);
@@ -65,13 +74,11 @@ public class RutinaService implements IRutinaService{
     }
 
     public List<Rutina> listarRutinas(){
-
         return rutinaRepo.findAll(Sort.by(Sort.Direction.DESC, "fecha"));
     }
 
     @Override
     public Rutina buscarPorId(Long id){
-
         return rutinaRepo.findById(id).orElse(null);
     }
 
@@ -83,6 +90,7 @@ public class RutinaService implements IRutinaService{
 
         rutinaRepo.delete(rutina);
 
+        // 🔥 ELIMINAR CLIENTE SI YA NO TIENE NADA
         if(planRepo.countByCliente(cliente) == 0 &&
                 rutinaRepo.countByCliente(cliente) == 0){
 
@@ -96,14 +104,14 @@ public class RutinaService implements IRutinaService{
         return rutinaRepo.findAll(pageable);
     }
 
-
     @Override
     public Rutina actualizarRutina(Long id, Map<String, Object> payload){
 
         Rutina existente = rutinaRepo.findById(id)
                 .orElseThrow(() -> new RuntimeException("Rutina no encontrada"));
 
-        existente.setRutinaHtml(payload.get("rutinaHtml").toString());
+        Object htmlObj = payload.get("rutinaHtml");
+        existente.setRutinaHtml(htmlObj != null ? htmlObj.toString() : "");
 
         existente.setFecha(LocalDate.now());
 
