@@ -33,8 +33,8 @@ public class AuthController {
 
             return ResponseEntity.ok(Map.of(
                     "token", "fake-jwt-123", // luego lo mejoramos
-                    "usuario", user.getUsuario(),
-                    "rol", user.getRol()
+                    "usuario", user.getUsuario()
+                  //  "rol", user.getRol()
             ));
 
         }catch(Exception e){
@@ -48,8 +48,9 @@ public class AuthController {
     public String init(){
 
         Usuario u = new Usuario();
-        u.setUsuario("admin");
-        u.setPassword("1234"); // o encriptado
+        u.setUsuario("admin2");
+        u.setPassword("1234");
+        u.setRol("ADMIN"); // 🔥 CLAVE
 
         usuarioRepo.save(u);
 

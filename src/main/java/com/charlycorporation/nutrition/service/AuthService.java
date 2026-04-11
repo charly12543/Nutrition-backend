@@ -13,6 +13,8 @@ public class AuthService {
 
     public Usuario login(String usuario, String password){
 
+        System.out.println("Buscando usuario: " + usuario);
+
         Usuario user = usuarioRepository.findByUsuario(usuario)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
