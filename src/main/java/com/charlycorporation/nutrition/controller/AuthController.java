@@ -2,6 +2,7 @@ package com.charlycorporation.nutrition.controller;
 
 import com.charlycorporation.nutrition.model.LoginRequest;
 import com.charlycorporation.nutrition.model.Usuario;
+import com.charlycorporation.nutrition.repository.UsuarioRepository;
 import com.charlycorporation.nutrition.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -16,6 +17,13 @@ public class AuthController {
 
     @Autowired
     private AuthService authService;
+
+    private final UsuarioRepository usuarioRepo;
+
+    public AuthController(UsuarioRepository usuarioRepo) {
+        this.usuarioRepo = usuarioRepo;
+    }
+
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest req){
@@ -36,16 +44,19 @@ public class AuthController {
     }
 
 
+    @GetMapping("/init")
+    public String init(){
+
+        Usuario u = new Usuario();
+        u.setUsuario("admin");
+        u.setPassword("1234"); // o encriptado
+
+        usuarioRepo.save(u);
+
+        return "usuario creado";
+    }
 
 
 
-   /* @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest req){
 
-        if(req.getUsuario().equals("charly") && req.getPassword().equals("1234")){
-            return ResponseEntity.ok(Map.of("token","123456"));
-        }
-
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-    }*/
 }
