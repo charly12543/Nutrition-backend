@@ -1,7 +1,9 @@
 package com.charlycorporation.nutrition.service;
 
 import com.charlycorporation.nutrition.model.Cliente;
+import com.charlycorporation.nutrition.model.Medidas;
 import com.charlycorporation.nutrition.model.Plan;
+import com.charlycorporation.nutrition.model.Plicometria;
 import com.charlycorporation.nutrition.repository.ClienteRepository;
 import com.charlycorporation.nutrition.repository.PlanRepository;
 import com.charlycorporation.nutrition.repository.RutinaRepository;
@@ -70,6 +72,7 @@ public class PlanService implements IPlanService{
 
             if(cliente.getId() != null){
 
+
                 clienteGuardado = clienteRepo.findById(cliente.getId())
                         .orElseThrow(() -> new RuntimeException("Cliente no encontrado"));
 
@@ -82,9 +85,58 @@ public class PlanService implements IPlanService{
                 clienteGuardado.setDiasGym(cliente.getDiasGym());
                 clienteGuardado.setTomaWhey(cliente.getTomaWhey());
 
+                // 🔥 AQUÍ TAMBIÉN ACTUALIZA LOS NUEVOS CAMPOS
+                if(cliente.getMedidas() != null){
+
+                    if(clienteGuardado.getMedidas() == null){
+                        clienteGuardado.setMedidas(new Medidas());
+                    }
+
+                    Medidas m = cliente.getMedidas();
+                    Medidas mg = clienteGuardado.getMedidas();
+
+                    mg.setBrazoIzquierdo(m.getBrazoIzquierdo());
+                    mg.setBrazoDerecho(m.getBrazoDerecho());
+
+                    mg.setCintura(m.getCintura());
+                    mg.setPecho(m.getPecho());
+                    mg.setEspalda(m.getEspalda());
+
+                    mg.setPiernaIzquierda(m.getPiernaIzquierda());
+                    mg.setPiernaDerecha(m.getPiernaDerecha());
+
+                    mg.setPantorrillaIzquierda(m.getPantorrillaIzquierda());
+                    mg.setPantorrillaDerecha(m.getPantorrillaDerecha());
+                }
+
+                if(cliente.getPlicometria() != null){
+
+                    if(clienteGuardado.getPlicometria() == null){
+                        clienteGuardado.setPlicometria(new Plicometria());
+                    }
+
+                    Plicometria p = cliente.getPlicometria();
+                    Plicometria pg = clienteGuardado.getPlicometria();
+
+                    pg.setBiceps(p.getBiceps());
+                    pg.setTriceps(p.getTriceps());
+                    pg.setSubescapular(p.getSubescapular());
+                    pg.setSuprailiaco(p.getSuprailiaco());
+                }
+
             } else {
 
                 cliente.setFechaRegistro(LocalDate.now());
+
+                // 🔥 EVITAR NULLS
+                if(cliente.getMedidas() == null){
+                    cliente.setMedidas(new Medidas());
+                }
+
+                if(cliente.getPlicometria() == null){
+                    cliente.setPlicometria(new Plicometria());
+                }
+
                 clienteGuardado = cliente;
             }
 
@@ -209,6 +261,42 @@ public class PlanService implements IPlanService{
                 cliente.setDiasGym(clienteActualizado.getDiasGym());
                 cliente.setTomaWhey(clienteActualizado.getTomaWhey());
 
+                // 🔥 NUEVO (IMPORTANTE)
+                if(clienteActualizado.getMedidas() != null){
+
+                    if(cliente.getMedidas() == null){
+                        cliente.setMedidas(new Medidas());
+                    }
+
+                    Medidas m = clienteActualizado.getMedidas();
+                    Medidas mg = cliente.getMedidas();
+
+                    mg.setBrazoIzquierdo(m.getBrazoIzquierdo());
+                    mg.setBrazoDerecho(m.getBrazoDerecho());
+                    mg.setCintura(m.getCintura());
+                    mg.setPecho(m.getPecho());
+                    mg.setEspalda(m.getEspalda());
+                    mg.setPiernaIzquierda(m.getPiernaIzquierda());
+                    mg.setPiernaDerecha(m.getPiernaDerecha());
+                    mg.setPantorrillaIzquierda(m.getPantorrillaIzquierda());
+                    mg.setPantorrillaDerecha(m.getPantorrillaDerecha());
+                }
+
+                if(clienteActualizado.getPlicometria() != null){
+
+                    if(cliente.getPlicometria() == null){
+                        cliente.setPlicometria(new Plicometria());
+                    }
+
+                    Plicometria p = clienteActualizado.getPlicometria(); // 🔥 origen (nuevo)
+                    Plicometria pg = cliente.getPlicometria();            // 🔥 destino (persistente)
+
+                    pg.setBiceps(p.getBiceps());
+                    pg.setTriceps(p.getTriceps());
+                    pg.setSubescapular(p.getSubescapular());
+                    pg.setSuprailiaco(p.getSuprailiaco());
+                }
+
                 clienteRepo.save(cliente);
             }
 
@@ -217,17 +305,6 @@ public class PlanService implements IPlanService{
             String dietaJson = mapper.writeValueAsString(dietaObj);
 
             JsonNode root = mapper.readTree(dietaJson);
-
-           /* String caloriasStr = root.path("calorias").asText();
-            String proteinaStr = root.path("proteina").asText();
-            String carbosStr = root.path("carbos").asText();
-            String grasaStr = root.path("grasa").asText();
-            int fase = root.path("clienteInfo").path("fase").asInt();
-
-            int calorias = Integer.parseInt(caloriasStr.replaceAll("[^0-9]", ""));
-            int proteina = Integer.parseInt(proteinaStr.replaceAll("[^0-9]", ""));
-            int carbos = Integer.parseInt(carbosStr.replaceAll("[^0-9]", ""));
-            int grasa = Integer.parseInt(grasaStr.replaceAll("[^0-9]", "")); */
 
             String caloriasStr = root.has("calorias") ? root.get("calorias").asText() : "0";
             String proteinaStr = root.has("proteina") ? root.get("proteina").asText() : "0";

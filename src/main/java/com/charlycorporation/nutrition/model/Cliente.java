@@ -21,7 +21,6 @@ public class Cliente {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-
     private String nombre;
     private double peso;
     private double altura;
@@ -34,12 +33,21 @@ public class Cliente {
 
     private LocalDate fechaRegistro;
 
-    // 🔥 EVITA LOOP JSON
+    // 🔥 NUEVO
+    private Boolean tieneMedidas;
+    private Boolean tienePlicometria;
+
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    private Medidas medidas;
+
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    private Plicometria plicometria;
+
+    // 🔥 RELACIONES
     @JsonIgnore
     @OneToMany(mappedBy = "cliente", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Plan> planes;
 
-    // 🔥 EVITA LOOP JSON
     @JsonIgnore
     @OneToMany(mappedBy = "cliente", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Rutina> rutinas;
