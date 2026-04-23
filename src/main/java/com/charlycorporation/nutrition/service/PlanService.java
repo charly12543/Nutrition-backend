@@ -32,50 +32,46 @@ public class PlanService implements IPlanService{
 
     private final RutinaRepository rutinaRepo;
 
-    //Metodo Guardar Dieta paciente
+    // Metodo Guardar Dieta paciente
     public Plan guardarPlan(Cliente cliente, String dietaJson, String dietaHtml){
 
         ObjectMapper mapper = new ObjectMapper();
 
         try {
+
+            // 🔥 VALIDACIÓN BÁSICA
+            if(dietaJson == null || dietaJson.isEmpty()){
+                throw new RuntimeException("dietaJson viene vacío");
+            }
+
             JsonNode root = mapper.readTree(dietaJson);
 
-            // 🔥 EXTRAER DATOS
-         /*   String caloriasStr = root.path("calorias").asText();
-            String proteinaStr = root.path("proteina").asText();
-            String carbosStr = root.path("carbos").asText();
-            String grasaStr = root.path("grasa").asText();
-            int fase = root.path("clienteInfo").path("fase").asInt(); */
-
+            // 🔥 EXTRAER DATOS SEGURO
             String caloriasStr = root.has("calorias") ? root.get("calorias").asText() : "0";
             String proteinaStr = root.has("proteina") ? root.get("proteina").asText() : "0";
             String carbosStr = root.has("carbos") ? root.get("carbos").asText() : "0";
             String grasaStr = root.has("grasa") ? root.get("grasa").asText() : "0";
 
-            int fase = root.has("clienteInfo") && root.get("clienteInfo").has("fase")
-                    ? root.get("clienteInfo").get("fase").asInt()
-                    : 1;
+            int fase = 1;
+            if(root.has("clienteInfo") && root.get("clienteInfo").has("fase")){
+                fase = root.get("clienteInfo").get("fase").asInt();
+            }
 
-            // 🔥 LIMPIAR
-           // int calorias = Integer.parseInt(caloriasStr.replaceAll("[^0-9]", ""));
-            // int proteina = Integer.parseInt(proteinaStr.replaceAll("[^0-9]", ""));
-           // int carbos = Integer.parseInt(carbosStr.replaceAll("[^0-9]", ""));
-           // int grasa = Integer.parseInt(grasaStr.replaceAll("[^0-9]", ""));
-
+            // 🔥 PARSE SAFE
             int calorias = parseSafe(caloriasStr);
             int proteina = parseSafe(proteinaStr);
             int carbos = parseSafe(carbosStr);
             int grasa = parseSafe(grasaStr);
 
-            // 🔍 BUSCAR SI YA EXISTE CLIENTE
+            // 🔍 CLIENTE
             Cliente clienteGuardado;
 
             if(cliente.getId() != null){
 
-
                 clienteGuardado = clienteRepo.findById(cliente.getId())
                         .orElseThrow(() -> new RuntimeException("Cliente no encontrado"));
 
+                // 🔥 UPDATE DATOS
                 clienteGuardado.setPeso(cliente.getPeso());
                 clienteGuardado.setAltura(cliente.getAltura());
                 clienteGuardado.setEdad(cliente.getEdad());
@@ -85,7 +81,7 @@ public class PlanService implements IPlanService{
                 clienteGuardado.setDiasGym(cliente.getDiasGym());
                 clienteGuardado.setTomaWhey(cliente.getTomaWhey());
 
-                // 🔥 AQUÍ TAMBIÉN ACTUALIZA LOS NUEVOS CAMPOS
+                // 🔥 MEDIDAS
                 if(cliente.getMedidas() != null){
 
                     if(clienteGuardado.getMedidas() == null){
@@ -97,18 +93,16 @@ public class PlanService implements IPlanService{
 
                     mg.setBrazoIzquierdo(m.getBrazoIzquierdo());
                     mg.setBrazoDerecho(m.getBrazoDerecho());
-
                     mg.setCintura(m.getCintura());
                     mg.setPecho(m.getPecho());
                     mg.setEspalda(m.getEspalda());
-
                     mg.setPiernaIzquierda(m.getPiernaIzquierda());
                     mg.setPiernaDerecha(m.getPiernaDerecha());
-
                     mg.setPantorrillaIzquierda(m.getPantorrillaIzquierda());
                     mg.setPantorrillaDerecha(m.getPantorrillaDerecha());
                 }
 
+                // 🔥 PLICOMETRÍA
                 if(cliente.getPlicometria() != null){
 
                     if(clienteGuardado.getPlicometria() == null){
@@ -128,7 +122,6 @@ public class PlanService implements IPlanService{
 
                 cliente.setFechaRegistro(LocalDate.now());
 
-                // 🔥 EVITAR NULLS
                 if(cliente.getMedidas() == null){
                     cliente.setMedidas(new Medidas());
                 }
@@ -142,14 +135,14 @@ public class PlanService implements IPlanService{
 
             clienteGuardado = clienteRepo.save(clienteGuardado);
 
-            // 🔥 NUEVO: VALIDAR SI YA TIENE UN PLAN (EVITAR DUPLICADOS)
+            // 🔥 EVITAR DUPLICADOS
             Optional<Plan> existente = planRepo.findTopByClienteOrderByFechaDesc(clienteGuardado);
 
             if(existente.isPresent()){
                 Plan plan = existente.get();
 
                 plan.setDieta(dietaJson);
-                plan.setHtml(dietaHtml);
+                plan.setHtml(dietaHtml != null ? dietaHtml : "");
 
                 plan.setCalorias(calorias);
                 plan.setProteina(proteina);
@@ -162,11 +155,11 @@ public class PlanService implements IPlanService{
                 return planRepo.save(plan);
             }
 
-            // 🔥 CREAR PLAN NUEVO (SI NO EXISTE)
+            // 🔥 NUEVO PLAN
             Plan plan = new Plan();
             plan.setCliente(clienteGuardado);
             plan.setDieta(dietaJson);
-            plan.setHtml(dietaHtml);
+            plan.setHtml(dietaHtml != null ? dietaHtml : "");
 
             plan.setCalorias(calorias);
             plan.setProteina(proteina);
@@ -179,7 +172,12 @@ public class PlanService implements IPlanService{
             return planRepo.save(plan);
 
         } catch (Exception e) {
-            throw new RuntimeException("Error procesando dieta JSON", e);
+
+            // 🔥 ESTE LOG ES CLAVE PARA TU DEBUG REAL
+            System.out.println("❌ ERROR GUARDAR PLAN:");
+            e.printStackTrace();
+
+            throw new RuntimeException("Error procesando dieta JSON: " + e.getMessage(), e);
         }
     }
 
@@ -187,7 +185,6 @@ public class PlanService implements IPlanService{
     public List<Plan> listarPlanes() {
         return planRepo.findAll(Sort.by(Sort.Direction.DESC, "fecha"));
     }
-
 
     @Override
     public void eliminarPlan(Long id) {
