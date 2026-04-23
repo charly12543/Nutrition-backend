@@ -27,21 +27,20 @@ public class PlanController {
     @PostMapping("/guardar-plan")
     public ResponseEntity<?> guardar(@RequestBody Map<String, Object> payload){
 
-        System.out.println("🔥 PAYLOAD: " + payload);
-
         try {
 
             ObjectMapper mapper = new ObjectMapper();
 
-            // 🔹 VALIDAR CLIENTE
+            // 🔹 CLIENTE
             Object clienteObj = payload.get("cliente");
+
             if(clienteObj == null){
                 return ResponseEntity.badRequest().body("❌ cliente es null");
             }
 
             Cliente cliente = mapper.convertValue(clienteObj, Cliente.class);
 
-            // 🔹 VALIDAR DIETA
+            // 🔹 DIETA
             Object dietaObj = payload.get("dieta");
             if(dietaObj == null){
                 return ResponseEntity.badRequest().body("❌ dieta es null");
@@ -49,20 +48,19 @@ public class PlanController {
 
             String dietaJson = mapper.writeValueAsString(dietaObj);
 
-            // 🔹 VALIDAR HTML
-            Object htmlObj = payload.get("html");
-            if(htmlObj == null){
-                return ResponseEntity.badRequest().body("❌ html es null");
-            }
+            // 🔹 HTML
+            String dietaHtml = payload.get("html") != null
+                    ? payload.get("html").toString()
+                    : "";
 
-            String dietaHtml = htmlObj.toString();
             Plan plan = planService.guardarPlan(cliente, dietaJson, dietaHtml);
 
             return ResponseEntity.ok(plan);
 
         } catch (Exception e){
             e.printStackTrace();
-            return ResponseEntity.internalServerError().body("❌ Error interno: " + e.getMessage());
+            return ResponseEntity.internalServerError()
+                    .body("❌ Error interno: " + e.getMessage());
         }
     }
 

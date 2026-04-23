@@ -46,11 +46,19 @@ public class PlanService implements IPlanService{
 
             JsonNode root = mapper.readTree(dietaJson);
 
-            // 🔥 EXTRAER DATOS SEGURO
-            String caloriasStr = root.has("calorias") ? root.get("calorias").asText() : "0";
-            String proteinaStr = root.has("proteina") ? root.get("proteina").asText() : "0";
-            String carbosStr = root.has("carbos") ? root.get("carbos").asText() : "0";
-            String grasaStr = root.has("grasa") ? root.get("grasa").asText() : "0";
+            // 🔥 VALIDACIÓN PRO (más segura)
+            if(!root.hasNonNull("calorias") || !root.hasNonNull("proteina")){
+                throw new RuntimeException("JSON incompleto: " + dietaJson);
+            }
+
+            // 🔥 EXTRAER DATOS
+            String caloriasStr = root.path("calorias").asText("0");
+            String proteinaStr = root.path("proteina").asText("0");
+            String carbosStr = root.path("carbos").asText("0");
+            String grasaStr = root.path("grasa").asText("0");
+
+            // 🔥 EXTRA NUEVO (por si lo usas)
+            double grasaCorporal = root.path("grasaCorporal").asDouble(0);
 
             int fase = 1;
             if(root.has("clienteInfo") && root.get("clienteInfo").has("fase")){
@@ -63,15 +71,15 @@ public class PlanService implements IPlanService{
             int carbos = parseSafe(carbosStr);
             int grasa = parseSafe(grasaStr);
 
-            // 🔍 CLIENTE
+            // ===================== CLIENTE =====================
             Cliente clienteGuardado;
 
-            if(cliente.getId() != null){
+            if(cliente.getId() != null && clienteRepo.existsById(cliente.getId())){
 
                 clienteGuardado = clienteRepo.findById(cliente.getId())
                         .orElseThrow(() -> new RuntimeException("Cliente no encontrado"));
 
-                // 🔥 UPDATE DATOS
+                // 🔥 UPDATE
                 clienteGuardado.setPeso(cliente.getPeso());
                 clienteGuardado.setAltura(cliente.getAltura());
                 clienteGuardado.setEdad(cliente.getEdad());
@@ -135,7 +143,8 @@ public class PlanService implements IPlanService{
 
             clienteGuardado = clienteRepo.save(clienteGuardado);
 
-            // 🔥 EVITAR DUPLICADOS
+            // ===================== PLAN =====================
+
             Optional<Plan> existente = planRepo.findTopByClienteOrderByFechaDesc(clienteGuardado);
 
             if(existente.isPresent()){
@@ -149,6 +158,9 @@ public class PlanService implements IPlanService{
                 plan.setCarbos(carbos);
                 plan.setGrasa(grasa);
                 plan.setFase(fase);
+
+                // 🔥 opcional si tienes campo
+                // plan.setGrasaCorporal(grasaCorporal);
 
                 plan.setFecha(LocalDate.now());
 
@@ -167,13 +179,15 @@ public class PlanService implements IPlanService{
             plan.setGrasa(grasa);
             plan.setFase(fase);
 
+            // 🔥 opcional
+            // plan.setGrasaCorporal(grasaCorporal);
+
             plan.setFecha(LocalDate.now());
 
             return planRepo.save(plan);
 
         } catch (Exception e) {
 
-            // 🔥 ESTE LOG ES CLAVE PARA TU DEBUG REAL
             System.out.println("❌ ERROR GUARDAR PLAN:");
             e.printStackTrace();
 
