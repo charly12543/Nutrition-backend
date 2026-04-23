@@ -34,13 +34,15 @@ public class Cliente {
     private LocalDate fechaRegistro;
 
     // 🔥 NUEVO
-    private Boolean tieneMedidas;
-    private Boolean tienePlicometria;
+    private Boolean tieneMedidas = false;
+    private Boolean tienePlicometria = false;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "medidas_id")
     private Medidas medidas;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "plicometria_id")
     private Plicometria plicometria;
 
     // 🔥 RELACIONES
