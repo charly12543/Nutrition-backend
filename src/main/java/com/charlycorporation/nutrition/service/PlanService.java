@@ -358,7 +358,9 @@ public class PlanService implements IPlanService{
         try {
             if(value == null) return 0;
 
-            String limpio = value.replaceAll("[^0-9]", "");
+            String limpio = value
+                    .replace(",", "")
+                    .replaceAll("[^0-9]", "");
 
             if(limpio.isEmpty()) return 0;
 
