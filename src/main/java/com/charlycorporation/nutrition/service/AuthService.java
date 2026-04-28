@@ -2,6 +2,7 @@ package com.charlycorporation.nutrition.service;
 
 import com.charlycorporation.nutrition.model.Usuario;
 import com.charlycorporation.nutrition.repository.UsuarioRepository;
+import com.charlycorporation.nutrition.security.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -11,9 +12,10 @@ public class AuthService {
     @Autowired
     private UsuarioRepository usuarioRepository;
 
-    public Usuario login(String usuario, String password){
+    @Autowired
+    private JwtUtil jwtUtil;
 
-        System.out.println("Buscando usuario: " + usuario);
+    public String login(String usuario, String password){
 
         Usuario user = usuarioRepository.findByUsuario(usuario)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
@@ -22,6 +24,6 @@ public class AuthService {
             throw new RuntimeException("Password incorrecto");
         }
 
-        return user;
+        return jwtUtil.generateToken(user.getUsuario());
     }
 }

@@ -29,12 +29,11 @@ public class AuthController {
     public ResponseEntity<?> login(@RequestBody LoginRequest req){
 
         try{
-            Usuario user = authService.login(req.getUsuario(), req.getPassword());
+            String token = authService.login(req.getUsuario(), req.getPassword());
 
             return ResponseEntity.ok(Map.of(
-                    "token", "fake-jwt-123", // luego lo mejoramos
-                    "usuario", user.getUsuario()
-                  //  "rol", user.getRol()
+                    "token", token,
+                    "usuario", req.getUsuario()
             ));
 
         }catch(Exception e){
