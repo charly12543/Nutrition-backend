@@ -28,6 +28,8 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest req){
 
+        System.out.println("🔥 LOGIN INTENTO: " + req.getUsuario());
+
         try{
             String token = authService.login(req.getUsuario(), req.getPassword());
 
@@ -37,6 +39,9 @@ public class AuthController {
             ));
 
         }catch(Exception e){
+
+            System.out.println("❌ ERROR LOGIN: " + e.getMessage());
+
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(Map.of("error", e.getMessage()));
         }
@@ -46,20 +51,17 @@ public class AuthController {
     @GetMapping("/init")
     public String init(){
 
-        if(usuarioRepo.findByUsuario("admin").isPresent()){
-            return "usuario ya existe";
-        }
+        Usuario u = usuarioRepo.findByUsuario("admin")
+                .orElse(new Usuario());
 
-        Usuario u = new Usuario();
         u.setUsuario("admin");
-        u.setPassword("1234");
+        u.setPassword("1234"); // 🔥 FORZAR
         u.setRol("ADMIN");
 
         usuarioRepo.save(u);
 
-        return "usuario creado";
+        return "usuario actualizado";
     }
-
 
 
 
