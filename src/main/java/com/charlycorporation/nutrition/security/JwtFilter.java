@@ -17,8 +17,7 @@ public class JwtFilter extends OncePerRequestFilter {
     private JwtUtil jwtUtil;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request,
-                                    HttpServletResponse response,
+    protected void doFilterInternal(HttpServletRequest request,HttpServletResponse response,
                                     FilterChain filterChain)
             throws ServletException, IOException {
 
@@ -48,6 +47,11 @@ public class JwtFilter extends OncePerRequestFilter {
                 response.getWriter().write("❌ Token requerido");
                 return;
             }
+        }
+
+        if (request.getMethod().equals("OPTIONS")) {
+            response.setStatus(HttpServletResponse.SC_OK);
+            return;
         }
 
         filterChain.doFilter(request, response);
