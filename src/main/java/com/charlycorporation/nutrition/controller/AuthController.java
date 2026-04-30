@@ -7,6 +7,7 @@ import com.charlycorporation.nutrition.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -17,6 +18,9 @@ public class AuthController {
 
     @Autowired
     private AuthService authService;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     private final UsuarioRepository usuarioRepo;
 
@@ -61,6 +65,21 @@ public class AuthController {
         usuarioRepo.save(u);
 
         return "usuario actualizado";
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<?> register(@RequestBody Usuario u){
+
+        if(usuarioRepo.findByUsuario(u.getUsuario()).isPresent()){
+            return ResponseEntity.badRequest().body("Usuario ya existe");
+        }
+
+        u.setPassword(passwordEncoder.encode(u.getPassword())); // 🔥 CLAVE
+        u.setRol(u.getRol() != null ? u.getRol() : "COACH");
+
+        usuarioRepo.save(u);
+
+        return ResponseEntity.ok("Usuario creado");
     }
 
 
