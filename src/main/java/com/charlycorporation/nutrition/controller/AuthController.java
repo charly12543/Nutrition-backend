@@ -51,22 +51,6 @@ public class AuthController {
         }
     }
 
-
-    @GetMapping("/init")
-    public String init(){
-
-        Usuario u = usuarioRepo.findByUsuario("admin")
-                .orElse(new Usuario());
-
-        u.setUsuario("admin");
-        u.setPassword("1234"); // 🔥 FORZAR
-        u.setRol("ADMIN");
-
-        usuarioRepo.save(u);
-
-        return "usuario actualizado";
-    }
-
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody Usuario u){
 
@@ -80,6 +64,27 @@ public class AuthController {
         usuarioRepo.save(u);
 
         return ResponseEntity.ok("Usuario creado");
+    }
+
+
+    @GetMapping("/init")
+    public String init(){
+
+        Usuario u = usuarioRepo.findByUsuario("admin")
+                .orElse(new Usuario());
+
+        u.setUsuario("admin");
+
+        // 🔥 MIGRACIÓN AUTOMÁTICA
+        if(u.getPassword() == null || !u.getPassword().startsWith("$2a$")){
+            u.setPassword(passwordEncoder.encode("1234"));
+        }
+
+        u.setRol("ADMIN");
+
+        usuarioRepo.save(u);
+
+        return "usuario actualizado (bcrypt ready)";
     }
 
 
