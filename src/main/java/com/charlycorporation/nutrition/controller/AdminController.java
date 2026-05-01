@@ -1,6 +1,7 @@
 package com.charlycorporation.nutrition.controller;
 
 import com.charlycorporation.nutrition.model.Usuario;
+import com.charlycorporation.nutrition.model.UsuarioRequest;
 import com.charlycorporation.nutrition.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -27,20 +28,16 @@ public class AdminController {
 
     // 🔥 CREAR USUARIO
     @PostMapping("/usuarios")
-    public Usuario crear(@RequestBody Map<String, Object> body){
+    public Usuario crear(@RequestBody UsuarioRequest req){
 
-        String usuario = (String) body.get("usuario");
-        String password = (String) body.get("password");
-        String rol = (String) body.get("rol");
-
-        if(password == null || password.isEmpty()){
+        if(req.password == null || req.password.isEmpty()){
             throw new RuntimeException("Password requerido");
         }
 
         Usuario u = new Usuario();
-        u.setUsuario(usuario);
-        u.setPassword(passwordEncoder.encode(password));
-        u.setRol(rol != null ? rol : "COACH");
+        u.setUsuario(req.usuario);
+        u.setPassword(passwordEncoder.encode(req.password));
+        u.setRol(req.rol != null ? req.rol : "COACH");
 
         return usuarioRepo.save(u);
     }
