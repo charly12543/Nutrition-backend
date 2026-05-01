@@ -3,6 +3,7 @@ package com.charlycorporation.nutrition.security;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -29,16 +30,10 @@ public class SecurityConfig {
                 .cors(cors -> {})
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/login", "/api/init", "/api/health",
-                                                   "/api/register").permitAll()
-
-                        // 🔥 SOLO ADMIN
+                        .requestMatchers("/api/login", "/api/init", "/api/health", "/api/register").permitAll()
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
-
-                        // 🔥 ADMIN Y COACH
-                        .requestMatchers("/api/planes/**", "/api/rutinas/**")
-                        .hasAnyRole("ADMIN", "COACH")
-
+                        .requestMatchers("/api/planes/**", "/api/rutinas/**").hasAnyRole("ADMIN", "COACH")
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
