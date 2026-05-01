@@ -1,5 +1,6 @@
 package com.charlycorporation.nutrition.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -18,6 +19,7 @@ public class Usuario {
     @Column(unique = true)
     private String usuario;
 
+    @JsonIgnore
     private String password;
 
     private String rol; // ADMIN, COACH, etc
