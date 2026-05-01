@@ -20,6 +20,8 @@ public class SecurityConfig {
     @Autowired
     private JwtFilter jwtFilter;
 
+
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
@@ -29,6 +31,14 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/login", "/api/init", "/api/health",
                                                    "/api/register").permitAll()
+
+                        // 🔥 SOLO ADMIN
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+
+                        // 🔥 ADMIN Y COACH
+                        .requestMatchers("/api/planes/**", "/api/rutinas/**")
+                        .hasAnyRole("ADMIN", "COACH")
+
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);

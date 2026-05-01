@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
@@ -63,14 +64,15 @@ public class JwtFilter extends OncePerRequestFilter {
 
             try {
                 String usuario = jwtUtil.extractUsuario(token);
+                String rol = jwtUtil.extractRol(token);
 
-                // 🔥 AQUÍ ES LA DIFERENCIA PRO
                 UsernamePasswordAuthenticationToken authentication =
                         new UsernamePasswordAuthenticationToken(
                                 usuario,
                                 null,
-                                List.of() // 🔥 aquí irán roles después
+                                List.of(new SimpleGrantedAuthority("ROLE_" + rol))
                         );
+
 
                 authentication.setDetails(
                         new WebAuthenticationDetailsSource().buildDetails(request)

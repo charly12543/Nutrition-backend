@@ -1,7 +1,7 @@
 package com.charlycorporation.nutrition.security;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.stereotype.Component;
 
@@ -15,22 +15,30 @@ public class JwtUtil {
             "mi-super-secret-key-que-es-larga-y-segura-123456".getBytes()
     );
 
-    public String generateToken(String usuario){
+    public String generateToken(String usuario, String rol){
 
         return Jwts.builder()
                 .setSubject(usuario)
+                .claim("rol", rol)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 2))
                 .signWith(SECRET_KEY)
                 .compact();
     }
 
-    public String extractUsuario(String token){
+    private Claims getClaims(String token){
         return Jwts.parserBuilder()
                 .setSigningKey(SECRET_KEY)
                 .build()
                 .parseClaimsJws(token)
-                .getBody()
-                .getSubject();
+                .getBody();
+    }
+
+    public String extractUsuario(String token){
+        return getClaims(token).getSubject();
+    }
+
+    public String extractRol(String token){
+        return getClaims(token).get("rol", String.class);
     }
 }

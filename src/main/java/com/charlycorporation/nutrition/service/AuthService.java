@@ -28,6 +28,7 @@ public class AuthService {
             throw new RuntimeException("Password incorrecto");
         }
 
-        return jwtUtil.generateToken(user.getUsuario());
+        //return jwtUtil.generateToken(user.getUsuario());
+        return jwtUtil.generateToken(user.getUsuario(), user.getRol());
     }
 }
