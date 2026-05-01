@@ -7,6 +7,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/admin")
@@ -26,13 +27,20 @@ public class AdminController {
 
     // 🔥 CREAR USUARIO
     @PostMapping("/usuarios")
-    public Usuario crear(@RequestBody Usuario u){
+    public Usuario crear(@RequestBody Map<String, Object> body){
 
-        u.setPassword(passwordEncoder.encode(u.getPassword()));
+        String usuario = (String) body.get("usuario");
+        String password = (String) body.get("password");
+        String rol = (String) body.get("rol");
 
-        if(u.getRol() == null){
-            u.setRol("COACH");
+        if(password == null || password.isEmpty()){
+            throw new RuntimeException("Password requerido");
         }
+
+        Usuario u = new Usuario();
+        u.setUsuario(usuario);
+        u.setPassword(passwordEncoder.encode(password));
+        u.setRol(rol != null ? rol : "COACH");
 
         return usuarioRepo.save(u);
     }

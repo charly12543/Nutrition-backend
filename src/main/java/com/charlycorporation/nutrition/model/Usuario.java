@@ -24,4 +24,9 @@ public class Usuario {
     private String password;
 
     private String rol; // ADMIN, COACH, etc
+
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
 }
