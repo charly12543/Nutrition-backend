@@ -73,6 +73,8 @@ public class JwtFilter extends OncePerRequestFilter {
                                 List.of(new SimpleGrantedAuthority("ROLE_" + rol))
                         );
 
+                System.out.println("ROL DEL TOKEN: " + rol);
+
 
                 authentication.setDetails(
                         new WebAuthenticationDetailsSource().buildDetails(request)
@@ -88,6 +90,8 @@ public class JwtFilter extends OncePerRequestFilter {
                 return;
             }
         }
+
+
 
         // ✅ 5. CONTINUAR
         filterChain.doFilter(request, response);
